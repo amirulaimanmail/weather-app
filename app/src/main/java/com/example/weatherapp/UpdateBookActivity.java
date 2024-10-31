@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,6 +33,10 @@ public class UpdateBookActivity extends AppCompatActivity {
 
         getAndSetIntentData();
 
+        ActionBar ab = getSupportActionBar();
+        assert ab != null;
+        ab.setTitle(title);
+
         updateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -41,6 +46,7 @@ public class UpdateBookActivity extends AppCompatActivity {
 
                 MyDatabaseHelper myDB = new MyDatabaseHelper(UpdateBookActivity.this);
                 myDB.updateData(id, title, author, pages);
+                finish();
             }
         });
 

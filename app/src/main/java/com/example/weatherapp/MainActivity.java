@@ -1,12 +1,16 @@
 package com.example.weatherapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> book_id, book_title, book_author, book_pages;
     BookListRecyclerAdapter bookListRecyclerAdapter;
 
+    Context context;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddBookActivity.class);
-                MainActivity.this.startActivityForResult(intent, 1);
+                MainActivity.this.startActivity(intent);
             }
         });
 
@@ -48,23 +54,20 @@ public class MainActivity extends AppCompatActivity {
         book_author = new ArrayList<>();
         book_pages = new ArrayList<>();
 
-        storeDataInArrays();
+        resetDataInArrays();
 
         bookListRecyclerAdapter = new BookListRecyclerAdapter(MainActivity.this,this, book_id, book_title, book_author, book_pages);
         recyclerView.setAdapter(bookListRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 1){
-            recreate();
-        }
-    }
+    void resetDataInArrays(){
+        book_id.clear();
+        book_title.clear();
+        book_author.clear();
+        book_pages.clear();
 
-    void storeDataInArrays(){
-        Cursor cursor = myDB.readALlData();
+        Cursor cursor = myDB.readAllData();
         if(cursor.getCount() == 0){
             //Toast.makeText(this, "No data found.", Toast.LENGTH_SHORT).show();
         } else{
@@ -77,5 +80,49 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.my_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.deleteAll){
+            confirmDialogDeleteAll();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    void confirmDialogDeleteAll(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete all data?");
+        builder.setMessage("Are you sure you want to delete this data?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
+                myDB.deleteAllData();
+
+                resetDataInArrays();
+                bookListRecyclerAdapter.notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        resetDataInArrays();
+        bookListRecyclerAdapter.notifyDataSetChanged();
     }
 }

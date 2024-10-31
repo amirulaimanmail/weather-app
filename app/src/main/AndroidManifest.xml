@@ -20,10 +20,15 @@
 
         <activity
             android:name=".UpdateBookActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".MainActivity"/>
 
         <activity
             android:name=".MainActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".MainWeatherActivity"
             android:exported="true"
             android:label="Weather App">
             <intent-filter>

@@ -59,14 +59,20 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public Cursor readALlData(){
-        String query = "SELECT * FROM " + TABLE_NAME;
+    public Cursor readAllData(){
         SQLiteDatabase db = this.getReadableDatabase();
-
         Cursor cursor = null;
-
-        if(db != null){
-            cursor = db.rawQuery(query, null);
+        if(db != null) {
+            try {
+                // Check if the table exists
+                String query = "SELECT * FROM " + TABLE_NAME;
+                cursor = db.rawQuery(query, null);
+            } catch (Exception e) {
+                // Create table if it does not exist
+                onCreate(db);
+                String query = "SELECT * FROM " + TABLE_NAME;
+                cursor = db.rawQuery(query, null);
+            }
         }
         return cursor;
     }
@@ -95,5 +101,11 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
         } else{
             Toast.makeText(context, "Successfully deleted data", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    void deleteAllData(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        onCreate(db);
     }
 }

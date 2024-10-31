@@ -20,8 +20,8 @@ public class BookListRecyclerAdapter extends RecyclerView.Adapter<BookListRecycl
     Activity activity;
     private final ArrayList<String> book_id, book_title, book_author, book_pages;
 
-    public BookListRecyclerAdapter(Activity acitivty, Context context, ArrayList<String> book_id, ArrayList<String> book_title, ArrayList<String> book_author, ArrayList<String> book_pages) {
-        this.activity = acitivty;
+    public BookListRecyclerAdapter(Activity activity, Context context, ArrayList<String> book_id, ArrayList<String> book_title, ArrayList<String> book_author, ArrayList<String> book_pages) {
+        this.activity = activity;
         this.context = context;
         this.book_id = book_id;
         this.book_title = book_title;
@@ -55,7 +55,7 @@ public class BookListRecyclerAdapter extends RecyclerView.Adapter<BookListRecycl
                 intent.putExtra("title", title);
                 intent.putExtra("author", author);
                 intent.putExtra("pages", pages);
-                activity.startActivityForResult(intent, 1);
+                context.startActivity(intent);
             }
         });
     }

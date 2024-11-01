@@ -11,10 +11,10 @@ import java.util.ArrayList;
 
 public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapter.LocationViewHolder> {
 
-    private Context context;
-    private ArrayList<String> locations;
+    private final Context context;
+    private final ArrayList<WeatherLocationModel> locations;
 
-    public LocationListAdapter(Context context, ArrayList<String> locations) {
+    public LocationListAdapter(Context context, ArrayList<WeatherLocationModel> locations) {
         this.context = context;
         this.locations = locations;
     }
@@ -28,7 +28,8 @@ public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapte
 
     @Override
     public void onBindViewHolder(@NonNull LocationViewHolder holder, int position) {
-        holder.locationName.setText(locations.get(position));
+        WeatherLocationModel location = locations.get(position);
+        holder.locationName.setText(location.getLocationName());
     }
 
     @Override
@@ -36,7 +37,7 @@ public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapte
         return locations.size();
     }
 
-    public void addLocation(String location) {
+    public void addLocation(WeatherLocationModel location) {
         locations.add(location);
         notifyItemInserted(locations.size() - 1);
     }

@@ -1,15 +1,14 @@
 package com.example.weatherapp;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
@@ -35,6 +34,7 @@ public class MainWeatherActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LocationListAdapter locationListAdapter;
     private ArrayList<WeatherLocationModel> locations;
+    private ProgressBar locationProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +64,7 @@ public class MainWeatherActivity extends AppCompatActivity {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_location, null);
         final Spinner spinner1 = dialogView.findViewById(R.id.spinner1);
         final Spinner spinner2 = dialogView.findViewById(R.id.spinner2);
+        locationProgressBar = dialogView.findViewById(R.id.progressBar);
 
         new FetchLocationsForDialog(spinner1).execute("https://api.met.gov.my/v2.1/locations?locationcategoryid=STATE");
 
@@ -98,6 +99,12 @@ public class MainWeatherActivity extends AppCompatActivity {
 
         public FetchLocationsForDialog(Spinner spinner) {
             this.spinner = spinner;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            locationProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -140,6 +147,9 @@ public class MainWeatherActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<WeatherLocationModel> locationsList) {
+            super.onPostExecute(locationsList);
+            locationProgressBar.setVisibility(View.INVISIBLE);
+
             ArrayAdapter<WeatherLocationModel> adapter = new ArrayAdapter<>(MainWeatherActivity.this,
                     android.R.layout.simple_spinner_item, locationsList);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

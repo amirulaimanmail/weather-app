@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -60,13 +61,30 @@ public class MainWeatherActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Add Location");
 
-        final Spinner spinner = new Spinner(this);
-        new FetchLocationsForDialog(spinner).execute("https://api.met.gov.my/v2.1/locations?locationcategoryid=STATE");
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_location, null);
+        final Spinner spinner1 = dialogView.findViewById(R.id.spinner1);
+        final Spinner spinner2 = dialogView.findViewById(R.id.spinner2);
 
-        builder.setView(spinner);
+        new FetchLocationsForDialog(spinner1).execute("https://api.met.gov.my/v2.1/locations?locationcategoryid=STATE");
+
+        spinner1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                WeatherLocationModel selectedLocation = (WeatherLocationModel) spinner1.getSelectedItem();
+                String locationRootId = selectedLocation.getLocationId();
+                String url = "https://api.met.gov.my/v2.1/locations?locationrootid=" + locationRootId + "&locationcategoryid=DISTRICT";
+                new FetchLocationsForDialog(spinner2).execute(url);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        builder.setView(dialogView);
 
         builder.setPositiveButton("Add", (dialog, which) -> {
-            WeatherLocationModel selectedLocation = (WeatherLocationModel) spinner.getSelectedItem();
+            WeatherLocationModel selectedLocation = (WeatherLocationModel) spinner2.getSelectedItem();
             locationListAdapter.addLocation(selectedLocation);
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
@@ -86,7 +104,7 @@ public class MainWeatherActivity extends AppCompatActivity {
         protected ArrayList<WeatherLocationModel> doInBackground(String... urls) {
             ArrayList<WeatherLocationModel> locationsList = new ArrayList<>();
             try {
-                Thread.sleep(3000); //simulate loading delay
+                Thread.sleep(0); //simulate loading delay
 
                 URL url = new URL(urls[0]);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();

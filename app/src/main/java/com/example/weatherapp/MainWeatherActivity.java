@@ -1,6 +1,7 @@
 package com.example.weatherapp;
 
 import android.app.AlertDialog;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -10,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,13 +30,19 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainWeatherActivity extends AppCompatActivity {
+public class MainWeatherActivity extends AppCompatActivity implements LocationListAdapter.OnButtonClickListener{
 
     private DrawerLayout drawerLayout;
     private RecyclerView recyclerView;
     private LocationListAdapter locationListAdapter;
     private ArrayList<WeatherLocationModel> locations;
     private ProgressBar locationProgressBar;
+    private Spinner spinner1;
+    private Spinner spinner2;
+
+    //database items
+    WeatherDatabaseHelper myDB;
+    ArrayList<String> weatherId, weatherLocationId, weatherLocationName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,13 +54,20 @@ public class MainWeatherActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler_view);
         FloatingActionButton addButton = findViewById(R.id.add_button);
 
+        //manage database
+        myDB = new WeatherDatabaseHelper(MainWeatherActivity.this);
+        weatherId= new ArrayList<>();
+        weatherLocationId = new ArrayList<>();
+        weatherLocationName = new ArrayList<>();
         locations = new ArrayList<>();
-        locationListAdapter = new LocationListAdapter(this, locations);
+
+        resetDataInArrays();
+
+        locationListAdapter = new LocationListAdapter(this, locations, this);
         recyclerView.setAdapter(locationListAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         addButton.setOnClickListener(v -> showAddLocationDialog());
-
         openDrawerButton.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.LEFT));
     }
 
@@ -62,19 +77,24 @@ public class MainWeatherActivity extends AppCompatActivity {
         builder.setTitle("Add Location");
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_location, null);
-        final Spinner spinner1 = dialogView.findViewById(R.id.spinner1);
-        final Spinner spinner2 = dialogView.findViewById(R.id.spinner2);
+        spinner1 = dialogView.findViewById(R.id.spinner1);
+        spinner2 = dialogView.findViewById(R.id.spinner2);
         locationProgressBar = dialogView.findViewById(R.id.progressBar);
 
-        new FetchLocationsForDialog(spinner1).execute("https://api.met.gov.my/v2.1/locations?locationcategoryid=STATE");
+        spinner1.setEnabled(false);
+        spinner2.setEnabled(false);
+
+        new FetchLocationsForDialog(spinner1, false).execute("https://api.met.gov.my/v2.1/locations?locationcategoryid=STATE");
 
         spinner1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
                 WeatherLocationModel selectedLocation = (WeatherLocationModel) spinner1.getSelectedItem();
                 String locationRootId = selectedLocation.getLocationId();
                 String url = "https://api.met.gov.my/v2.1/locations?locationrootid=" + locationRootId + "&locationcategoryid=DISTRICT";
-                new FetchLocationsForDialog(spinner2).execute(url);
+
+                new FetchLocationsForDialog(spinner2, true).execute(url);
             }
 
             @Override
@@ -85,26 +105,61 @@ public class MainWeatherActivity extends AppCompatActivity {
         builder.setView(dialogView);
 
         builder.setPositiveButton("Add", (dialog, which) -> {
+
             WeatherLocationModel selectedLocation = (WeatherLocationModel) spinner2.getSelectedItem();
-            locationListAdapter.addLocation(selectedLocation);
+            //locationListAdapter.addLocation(selectedLocation);
+            myDB.addLocation(selectedLocation.getLocationId(),selectedLocation.getLocationName());
+            resetDataInArrays();
+            locationListAdapter.notifyDataSetChanged();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         builder.show();
     }
 
+    //read data from database
+    void resetDataInArrays(){
+        weatherId.clear();
+        weatherLocationId.clear();
+        weatherLocationName.clear();
+        locations.clear();
+
+        Cursor cursor = myDB.readAllData();
+        if(cursor.getCount() == 0){
+            Toast.makeText(this, "No data found.", Toast.LENGTH_SHORT).show();
+        } else{
+            Toast.makeText(this, "Data found!", Toast.LENGTH_SHORT).show();
+            while(cursor.moveToNext()){
+                weatherId.add(cursor.getString(0));
+                weatherLocationId.add(cursor.getString(1));
+                weatherLocationName.add(cursor.getString(2));
+                locations.add(new WeatherLocationModel(cursor.getString(1),cursor.getString(2)));
+            }
+        }
+    }
+
+    @Override
+    public void onButtonClick(String locationId) {
+        Toast.makeText(this, locationId, Toast.LENGTH_SHORT).show();
+        drawerLayout.close();
+    }
+
     //Fetches a list of states for dialog
     private class FetchLocationsForDialog extends AsyncTask<String, Void, ArrayList<WeatherLocationModel>> {
         private final Spinner spinner;
+        private boolean hideLoaderWhenComplete;
 
-        public FetchLocationsForDialog(Spinner spinner) {
+        public FetchLocationsForDialog(Spinner spinner, boolean hideLoaderWhenComplete) {
             this.spinner = spinner;
+            this.hideLoaderWhenComplete = hideLoaderWhenComplete;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             locationProgressBar.setVisibility(View.VISIBLE);
+            spinner1.setEnabled(false);
+            spinner2.setEnabled(false);
         }
 
         @Override
@@ -148,7 +203,11 @@ public class MainWeatherActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(ArrayList<WeatherLocationModel> locationsList) {
             super.onPostExecute(locationsList);
-            locationProgressBar.setVisibility(View.INVISIBLE);
+            if(hideLoaderWhenComplete){
+                locationProgressBar.setVisibility(View.INVISIBLE);
+                spinner1.setEnabled(true);
+                spinner2.setEnabled(true);
+            }
 
             ArrayAdapter<WeatherLocationModel> adapter = new ArrayAdapter<>(MainWeatherActivity.this,
                     android.R.layout.simple_spinner_item, locationsList);

@@ -15,11 +15,11 @@
         android:theme="@style/Theme.WeatherApp"
         tools:targetApi="31">
         <activity
-            android:name=".AddBookActivity"
+            android:name=".booktutorial.AddBookActivity"
             android:exported="false" />
 
         <activity
-            android:name=".UpdateBookActivity"
+            android:name=".booktutorial.UpdateBookActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity"/>
 

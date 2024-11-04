@@ -1,4 +1,4 @@
-package com.example.weatherapp;
+package com.example.weatherapp.booktutorial;
 
 import android.content.Context;
 import android.graphics.Bitmap;

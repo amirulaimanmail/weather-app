@@ -17,6 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.weatherapp.booktutorial.AddBookActivity;
+import com.example.weatherapp.booktutorial.BookListRecyclerAdapter;
+import com.example.weatherapp.booktutorial.MyDatabaseHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;

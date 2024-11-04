@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -65,6 +66,7 @@ public class MainWeatherActivity extends AppCompatActivity implements LocationLi
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.actv_mainweather);
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -186,7 +188,7 @@ public class MainWeatherActivity extends AppCompatActivity implements LocationLi
         deleteLocationDialog(locationId, position);
     }
 
-    //Fetches a list of states for dialog
+    //Fetches a list of states for dialog and updates to spinner
     private class FetchLocationsForDialog extends AsyncTask<String, Void, ArrayList<WeatherLocationModel>> {
         private final Spinner spinner;
         private final boolean hideLoaderWhenComplete;
@@ -258,6 +260,7 @@ public class MainWeatherActivity extends AppCompatActivity implements LocationLi
         }
     }
 
+    //Fetches weather forecast and update to front screen
     private class FetchWeatherForecast extends AsyncTask<String, Void, DisplayWeatherDataModel>{
 
         @Override
@@ -372,6 +375,7 @@ public class MainWeatherActivity extends AppCompatActivity implements LocationLi
         return retrievedId;
     }
 
+    //updates front screen
     private void updateDisplayData(){
         CustomDateManager getDate = new CustomDateManager();
         String currentDate = getDate.getCurrentDate();

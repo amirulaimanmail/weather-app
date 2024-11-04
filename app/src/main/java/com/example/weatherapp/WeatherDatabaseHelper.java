@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+
 class WeatherDatabaseHelper extends SQLiteOpenHelper {
 
     private final Context context;
@@ -52,13 +54,15 @@ class WeatherDatabaseHelper extends SQLiteOpenHelper {
         if(result == -1){
             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
         } else{
-            //Toast.makeText(context, "Added location successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Added location successfully", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public Cursor readAllData(){
+    public ArrayList<WeatherLocationModel> readAllData(){
+        ArrayList<WeatherLocationModel> locations = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = null;
+        Cursor cursor;
+
         if(db != null) {
             try {
                 // Check if the table exists
@@ -70,8 +74,17 @@ class WeatherDatabaseHelper extends SQLiteOpenHelper {
                 String query = "SELECT * FROM " + TABLE_NAME;
                 cursor = db.rawQuery(query, null);
             }
+
+            if(cursor.getCount() != 0){
+                while(cursor.moveToNext()){
+                    locations.add(new WeatherLocationModel(cursor.getString(0), cursor.getString(1),cursor.getString(2)));
+                }
+            } else{
+                Toast.makeText(context, "Database is empty.", Toast.LENGTH_SHORT).show();
+            }
+            cursor.close();
         }
-        return cursor;
+        return locations;
     }
 
     void deleteData(String row_id){
@@ -81,7 +94,7 @@ class WeatherDatabaseHelper extends SQLiteOpenHelper {
         if(result == -1){
             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
         } else{
-            //Toast.makeText(context, "Successfully deleted data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Successfully deleted data", Toast.LENGTH_SHORT).show();
         }
     }
 

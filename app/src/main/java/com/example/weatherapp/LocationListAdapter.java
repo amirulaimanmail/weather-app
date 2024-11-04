@@ -45,6 +45,7 @@ public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapte
 
         holder.locationItemLayout.setOnClickListener(v -> onButtonClickListener.onSelectLocationClick(location.getLocationId()));
 
+        //show delete button when long press
         holder.locationItemLayout.setOnLongClickListener(v -> {
             holder.locationDeleteButton.setVisibility(View.VISIBLE);
             return true;

@@ -14,23 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WeatherApp"
         tools:targetApi="31">
-        <activity
-            android:name=".booktutorial.AddBookActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".booktutorial.UpdateBookActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity"/>
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-
-        </activity>
-
-        <activity
-            android:name=".MainWeatherActivity"
             android:exported="true"
             android:label="Weather App">
             <intent-filter>
@@ -39,6 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

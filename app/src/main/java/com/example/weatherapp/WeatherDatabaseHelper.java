@@ -42,7 +42,7 @@ class WeatherDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addLocation(String locationId, String locationName){
+    public void addData(String locationId, String locationName){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
@@ -52,7 +52,7 @@ class WeatherDatabaseHelper extends SQLiteOpenHelper {
         if(result == -1){
             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
         } else{
-            Toast.makeText(context, "Added location successfully", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Added location successfully", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -81,13 +81,13 @@ class WeatherDatabaseHelper extends SQLiteOpenHelper {
         if(result == -1){
             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
         } else{
-            Toast.makeText(context, "Successfully deleted data", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Successfully deleted data", Toast.LENGTH_SHORT).show();
         }
     }
 
-    void deleteAllData(){
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
-    }
+//    void deleteAllData(){
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+//        onCreate(db);
+//    }
 }

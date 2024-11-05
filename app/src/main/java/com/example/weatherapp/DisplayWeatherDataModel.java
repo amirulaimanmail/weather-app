@@ -10,17 +10,6 @@ public class DisplayWeatherDataModel {
     private String tMax;
     private String weatherHighlight;
 
-    public DisplayWeatherDataModel(String locationName, String date, String day, String tMin, String tMax, String weatherHighlight) {
-        this.locationName = locationName;
-        this.date = date;
-        this.day = day;
-        this.tMin = tMin;
-        this.tMax = tMax;
-        this.weatherHighlight = weatherHighlight;
-    }
-
-    public DisplayWeatherDataModel(){}
-
     public String getLocationName() {
         return locationName;
     }
@@ -69,9 +58,16 @@ public class DisplayWeatherDataModel {
         this.weatherHighlight = weatherHighlight;
     }
 
+    public String getShortDay(){
+        String day = getDay();
+        if (day != null && day.length() >= 3) {
+            return day.substring(0, 3);
+        }
+        return day;
+    }
+
     public void displayData() {
         String tag = "DisplayWeatherDataModel"; // Log tag for filtering
-
         Log.d(tag, "Location Name: " + locationName);
         Log.d(tag, "Date: " + date);
         Log.d(tag, "Day: " + day);

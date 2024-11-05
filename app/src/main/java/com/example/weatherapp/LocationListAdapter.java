@@ -3,7 +3,6 @@ package com.example.weatherapp;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -48,14 +47,8 @@ public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapte
         //show delete button when long press
         holder.locationItemLayout.setOnLongClickListener(v -> {
             holder.locationDeleteButton.setVisibility(View.VISIBLE);
+            hideOnce = true;
             return true;
-        });
-
-        holder.locationItemLayout.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                hideOnce = true; // Set hideOnce to true when the user releases the touch
-            }
-            return false; // Return false to ensure other touch events are processed
         });
 
         holder.locationDeleteButton.setOnClickListener(v -> onButtonClickListener.onDeleteLocationClick(location.getDatabaseId(), position));
@@ -77,8 +70,11 @@ public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapte
     }
 
     public void hideAllDeleteButtons() {
-        for (LocationViewHolder holder : viewHolders) {
-            holder.locationDeleteButton.setVisibility(View.GONE);
+        if(hideOnce)
+        {
+            for (LocationViewHolder holder : viewHolders) {
+                holder.locationDeleteButton.setVisibility(View.GONE);
+            }
         }
         hideOnce = false;
     }

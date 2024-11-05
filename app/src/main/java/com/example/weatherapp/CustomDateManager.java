@@ -2,10 +2,12 @@ package com.example.weatherapp;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class CustomDateManager {
+
     public String convertDateToDay(String dateString){
         try {
             // Original date format
@@ -40,5 +42,11 @@ public class CustomDateManager {
     public String getCurrentDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(new Date());
+    }
+
+    public String getDateAfterDays(int days) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, days); return sdf.format(calendar.getTime());
     }
 }

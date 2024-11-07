@@ -9,6 +9,9 @@ public class DisplayWeatherDataModel {
     private String tMin;
     private String tMax;
     private String weatherHighlight;
+    private String weatherMorning;
+    private String weatherAfternoon;
+    private String weatherNight;
 
     public String getLocationName() {
         return locationName;
@@ -56,6 +59,30 @@ public class DisplayWeatherDataModel {
 
     public void setWeatherHighlight(String weatherHighlight) {
         this.weatherHighlight = weatherHighlight;
+    }
+
+    public String getWeatherMorning() {
+        return weatherMorning;
+    }
+
+    public void setWeatherMorning(String weatherMorning) {
+        this.weatherMorning = weatherMorning;
+    }
+
+    public String getWeatherAfternoon() {
+        return weatherAfternoon;
+    }
+
+    public void setWeatherAfternoon(String weatherAfternoon) {
+        this.weatherAfternoon = weatherAfternoon;
+    }
+
+    public String getWeatherNight() {
+        return weatherNight;
+    }
+
+    public void setWeatherNight(String weatherNight) {
+        this.weatherNight = weatherNight;
     }
 
     public String getShortDay(){

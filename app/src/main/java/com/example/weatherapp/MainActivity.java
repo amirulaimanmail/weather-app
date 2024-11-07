@@ -5,12 +5,14 @@ import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -19,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,28 +36,36 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements LocationListAdapter.OnButtonClickListener {
 
     private DrawerLayout drawerLayout;
     private RecyclerView recyclerView;
     private LocationListAdapter locationListAdapter;
-    private ProgressBar locationProgressBar;
+    private ProgressBar locationProgressBar1;
+    private ProgressBar locationProgressBar2;
     private ConstraintLayout weatherProgressBar;
 
     //DECLARE WEATHER DATA UI ELEMENTS
+    private ConstraintLayout backgroundLayout;
+
     private TextView weathertemp_tv;
     private TextView weatherdate_tv;
     private TextView weatherstatus_tv;
     private TextView weatherlocation_tv;
+    private ImageView weathericon_iv;
 
-    private TextView day1_day_tv;
+    private ImageView weatherIconMorning_iv, weatherIconAfternoon_iv, weatherIconNight_iv;
 
-    private TextView day2_day_tv;
+    private TextView weatherUpDay1_tv, weatherUpDay2_tv, weatherUpDay3_tv;
 
-    private TextView day3_day_tv;
+    private TextView weatherTempDay1_tv, weatherTempDay2_tv, weatherTempDay3_tv;
+
+    private ImageView weatherIconDay1_iv, weatherIconDay2_iv, weatherIconDay3_iv;
 
 
+    //
     private ArrayList<WeatherLocationModel> locations;
 
     private Spinner spinner1;
@@ -75,15 +86,30 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         FloatingActionButton addButton = findViewById(R.id.add_button);
 
         //set ui elements
+         backgroundLayout = findViewById(R.id.background_main);
+
         weathertemp_tv = findViewById(R.id.weathertemp_tv);
         weatherdate_tv = findViewById(R.id.date_tv);
         weatherstatus_tv = findViewById(R.id.weatherstatus_tv);
         weatherlocation_tv = findViewById(R.id.weatherlocation_tv);
         weatherProgressBar = findViewById(R.id.weather_progressbar);
+        weathericon_iv = findViewById(R.id.weathericon_iv);
 
-        day1_day_tv = findViewById(R.id.upcomingDay1_tv);
-        day2_day_tv = findViewById(R.id.upcomingDay2_tv);
-        day3_day_tv = findViewById(R.id.upcomingDay3_tv);
+        weatherIconMorning_iv = findViewById(R.id.mIcon_iv);
+        weatherIconAfternoon_iv = findViewById(R.id.aIcon_iv);
+        weatherIconNight_iv = findViewById(R.id.nIcon_iv);
+
+        weatherUpDay1_tv = findViewById(R.id.upcomingDay1_tv);
+        weatherUpDay2_tv = findViewById(R.id.upcomingDay2_tv);
+        weatherUpDay3_tv = findViewById(R.id.upcomingDay3_tv);
+
+        weatherTempDay1_tv = findViewById(R.id.upcomingTemp1_tv);
+        weatherTempDay2_tv = findViewById(R.id.upcomingTemp2_tv);
+        weatherTempDay3_tv = findViewById(R.id.upcomingTemp3_tv);
+
+        weatherIconDay1_iv = findViewById(R.id.upcomingIcon1_iv);
+        weatherIconDay2_iv = findViewById(R.id.upcomingIcon2_iv);
+        weatherIconDay3_iv = findViewById(R.id.upcomingIcon3_iv);
 
         //manage database
         myDB = new WeatherDatabaseHelper(MainActivity.this);
@@ -94,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         addButton.setOnClickListener(v -> showAddLocationDialog());
-        openDrawerButton.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.LEFT));
+        openDrawerButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
         updateDisplayData();
     }
@@ -107,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         return super.dispatchTouchEvent(ev);
     }
 
+    private FetchLocationsForDialog currentSpinner2Task;
+
     //Dialog to add location
     private void showAddLocationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -115,7 +143,8 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_location, null);
         spinner1 = dialogView.findViewById(R.id.spinner1);
         spinner2 = dialogView.findViewById(R.id.spinner2);
-        locationProgressBar = dialogView.findViewById(R.id.progressBar);
+        locationProgressBar1 = dialogView.findViewById(R.id.progressBar1);
+        locationProgressBar2 = dialogView.findViewById(R.id.progressBar2);
 
         spinner1.setEnabled(false);
         spinner2.setEnabled(false);
@@ -125,11 +154,19 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
+
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.alert_dialog_bg_1);
         dialog.show();
+
+        //SET DIALOG WIDTH SIZE
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(dialog.getWindow().getAttributes());
+        layoutParams.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.85); // 80% of screen width
+        dialog.getWindow().setAttributes(layoutParams);
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
 
-        new FetchLocationsForDialog(spinner1, false, dialog).execute("https://api.met.gov.my/v2.1/locations?locationcategoryid=STATE");
+        new FetchLocationsForDialog(spinner1, 1, dialog).execute("https://api.met.gov.my/v2.1/locations?locationcategoryid=STATE");
 
         spinner1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -139,11 +176,17 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                 String locationRootId = selectedLocation.getLocationId();
                 String url = "https://api.met.gov.my/v2.1/locations?locationrootid=" + locationRootId + "&locationcategoryid=DISTRICT";
 
+                // Cancel the previous task if it's still running
+                 if (currentSpinner2Task != null && currentSpinner2Task.getStatus() != AsyncTask.Status.FINISHED) {
+                     currentSpinner2Task.cancel(true);
+                 }
+
                 // Clear spinner2 before loading new data
                 ArrayAdapter<WeatherLocationModel> emptyAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new ArrayList<>());
                 spinner2.setAdapter(emptyAdapter);
 
-                new FetchLocationsForDialog(spinner2, true, dialog).execute(url);
+                currentSpinner2Task = new FetchLocationsForDialog(spinner2, 2, dialog);
+                currentSpinner2Task.execute(url);
             }
 
             @Override
@@ -154,7 +197,11 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                if (((SpinnerAdapter) spinner2.getAdapter()).isItemDisabled(position)) {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                } else {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                }
             }
 
             @Override
@@ -194,12 +241,12 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
     //Fetches a list of states for dialog and updates to spinner
     private class FetchLocationsForDialog extends AsyncTask<String, Void, ArrayList<WeatherLocationModel>> {
         private final Spinner spinner;
-        private final boolean hideLoaderWhenComplete;
+        private final int loader;
         private final AlertDialog dialog;
 
-        public FetchLocationsForDialog(Spinner spinner, boolean hideLoaderWhenComplete, AlertDialog dialog) {
+        public FetchLocationsForDialog(Spinner spinner, int loader, AlertDialog dialog) {
             this.spinner = spinner;
-            this.hideLoaderWhenComplete = hideLoaderWhenComplete;
+            this.loader = loader;
             this.dialog = dialog;
         }
 
@@ -207,10 +254,17 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         protected void onPreExecute() {
             super.onPreExecute();
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-            locationProgressBar.setVisibility(View.VISIBLE);
-            spinner1.setEnabled(false);
-            spinner2.setEnabled(false);
 
+            switch(loader){
+                case 1:
+                    locationProgressBar1.setVisibility(View.VISIBLE);
+                    spinner1.setEnabled(false);
+                    break;
+                case 2:
+                    locationProgressBar2.setVisibility(View.VISIBLE);
+                    spinner2.setEnabled(false);
+                    break;
+            }
         }
 
         @Override
@@ -234,12 +288,6 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                 in.close();
                 conn.disconnect();
 
-                //retrieve list of existing locationIds
-                ArrayList<String> existingIds = new ArrayList<>();
-                for (WeatherLocationModel location : locations) {
-                    existingIds.add(location.getLocationId());
-                }
-
                 JSONObject jsonObject = new JSONObject(content.toString());
                 JSONArray resultsArray = jsonObject.getJSONArray("results");
 
@@ -249,11 +297,8 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                     String locationId = result.getString("id");
                     String locationName = result.getString("name");
 
-                    // Only add new locations
-                    if (!existingIds.contains(locationId)) {
-                        WeatherLocationModel location = new WeatherLocationModel(locationId, locationName);
-                        locationsList.add(location);
-                    }
+                    WeatherLocationModel location = new WeatherLocationModel(locationId, locationName);
+                    locationsList.add(location);
                 }
 
             } catch (Exception e) {
@@ -265,23 +310,37 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         @Override
         protected void onPostExecute(ArrayList<WeatherLocationModel> locationsList) {
             super.onPostExecute(locationsList);
-            if(hideLoaderWhenComplete){
-                locationProgressBar.setVisibility(View.INVISIBLE);
-                spinner1.setEnabled(true);
 
-                if(locationsList.isEmpty()){
-                    spinner2.setEnabled(false);
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-                }
-                else {
-                    spinner2.setEnabled(true);
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                }
+            switch(loader){
+                case 1:
+                    Log.d("TAG", "WEE");
+                    locationProgressBar1.setVisibility(View.INVISIBLE);
+                    break;
+                case 2:
+                    Log.d("TAG", "WOO");
+                    if(locationsList.isEmpty()){
+                        spinner2.setEnabled(false);
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                    }
+                    else {
+                        spinner2.setEnabled(true);
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                    }
+                    Log.d("TAG", "1");
+                    locationProgressBar2.setVisibility(View.INVISIBLE);
+                    Log.d("TAG", "2");
+                    spinner1.setEnabled(true);
+                    break;
             }
 
-            ArrayAdapter<WeatherLocationModel> adapter = new ArrayAdapter<>(MainActivity.this,
-                    android.R.layout.simple_spinner_item, locationsList);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            //retrieve list of existing locationIds
+            ArrayList<String> existingIds = new ArrayList<>();
+            for (WeatherLocationModel location : locations) {
+                existingIds.add(location.getLocationId());
+            }
+
+            //initialize adapter
+            SpinnerAdapter adapter = new SpinnerAdapter(MainActivity.this, locationsList, existingIds);
             spinner.setAdapter(adapter);
         }
     }
@@ -340,27 +399,67 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                                         weatherDayData3.setLocationName(result.getString("locationname"));
                                         weatherDayData4.setLocationName(result.getString("locationname"));
 
+                                        weatherDayData1.setWeatherMorning(result.getString("value"));
+
                                         weatherDayData1.setDate(result.getString("date"));
                                         String day1 = converter.convertDateToDay(result.getString("date"));
                                         weatherDayData1.setDay(day1);
                                         break;
                                     case 1:
+                                        weatherDayData2.setWeatherMorning(result.getString("value"));
+
                                         weatherDayData2.setDate(result.getString("date"));
                                         String day2 = converter.convertDateToDay(result.getString("date"));
                                         weatherDayData2.setDay(day2);
                                         break;
                                     case 2:
+                                        weatherDayData3.setWeatherMorning(result.getString("value"));
+
                                         weatherDayData3.setDate(result.getString("date"));
                                         String day3 = converter.convertDateToDay(result.getString("date"));
                                         weatherDayData3.setDay(day3);
                                         break;
                                     case 3:
+                                        weatherDayData4.setWeatherMorning(result.getString("value"));
+
                                         weatherDayData4.setDate(result.getString("date"));
                                         String day4 = converter.convertDateToDay(result.getString("date"));
                                         weatherDayData4.setDay(day4);
                                         break;
                                 }
                                 break;
+
+                            case "FGA":
+                                switch(j) {
+                                    case 0:
+                                        weatherDayData1.setWeatherAfternoon(result.getString("value"));
+                                        break;
+                                    case 1:
+                                        weatherDayData2.setWeatherAfternoon(result.getString("value"));
+                                        break;
+                                    case 2:
+                                        weatherDayData3.setWeatherAfternoon(result.getString("value"));
+                                        break;
+                                    case 3:
+                                        weatherDayData4.setWeatherAfternoon(result.getString("value"));
+                                        break;
+                                }
+
+                            case "FGN":
+                                switch(j) {
+                                    case 0:
+                                        weatherDayData1.setWeatherNight(result.getString("value"));
+                                        break;
+                                    case 1:
+                                        weatherDayData2.setWeatherNight(result.getString("value"));
+                                        break;
+                                    case 2:
+                                        weatherDayData3.setWeatherNight(result.getString("value"));
+                                        break;
+                                    case 3:
+                                        weatherDayData4.setWeatherNight(result.getString("value"));
+                                        break;
+                                }
 
                             case "FMAXT":
                                 switch(j) {
@@ -433,48 +532,152 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
             // This is where you can handle the returned weatherData, for example:
             if (weatherData != null) {
 
-                weatherData.get(0).displayData(); // Using the displayData method for logging
-                weatherData.get(1).displayData(); // Using the displayData method for logging
-                weatherData.get(2).displayData(); // Using the displayData method for logging
-                weatherData.get(3).displayData(); // Using the displayData method for logging
-
                 // Update UI with weatherData here
                 weatherlocation_tv.setText(weatherData.get(0).getLocationName());
                 weathertemp_tv.setText(weatherData.get(0).gettMax());
-                weatherstatus_tv.setText(weatherData.get(0).getWeatherHighlight());
+
                 CustomDateManager convertDate = new CustomDateManager();
                 String date_tv_string = convertDate.convertToSimpleDate(weatherData.get(0).getDate())  + " | " + weatherData.get(0).getDay();
                 weatherdate_tv.setText(date_tv_string);
 
-                day1_day_tv.setText(weatherData.get(1).getShortDay());
-                day2_day_tv.setText(weatherData.get(2).getShortDay());
-                day3_day_tv.setText(weatherData.get(3).getShortDay());
+                //update weather icon
+                CustomDateManager getDayStat = new CustomDateManager();
+                switch(getDayStat.getTimeOfDay()){
+                    case 0:
+                        String weatherStatus = weatherData.get(0).getWeatherMorning();
+                        if(Objects.equals(weatherStatus, "No rain")){
+                            weatherStatus = "Sunny";
+                        }
 
+                        weatherstatus_tv.setText(weatherStatus);
+                        if (weatherStatus.toLowerCase().contains("storm")) {
+                            weathericon_iv.setImageResource(R.drawable.rainy);
+                            backgroundLayout.setBackgroundResource(R.drawable.day_cloudy_background);
+                        }
+                        else {
+                            weathericon_iv.setImageResource(R.drawable.cloudy);
+                            backgroundLayout.setBackgroundResource(R.drawable.day_clearsky_background);
+                        }
+                        break;
 
-                weatherProgressBar.setVisibility(View.INVISIBLE);
+                    case 1:
+                        String weatherStatus1 = weatherData.get(0).getWeatherAfternoon();
+                        if(Objects.equals(weatherStatus1, "No rain")){
+                            weatherStatus1 = "Sunny";
+                        }
+
+                        weatherstatus_tv.setText(weatherStatus1);
+                        if (weatherStatus1.toLowerCase().contains("storm")) {
+                            weathericon_iv.setImageResource(R.drawable.rainy);
+                            backgroundLayout.setBackgroundResource(R.drawable.day_cloudy_background);
+                        }
+                        else {
+                            weathericon_iv.setImageResource(R.drawable.cloudy);
+                            backgroundLayout.setBackgroundResource(R.drawable.day_clearsky_background);
+
+                        }
+                        break;
+
+                    case 2:
+                        String weatherStatus2 = weatherData.get(0).getWeatherNight();
+                        if(Objects.equals(weatherStatus2, "No rain")){
+                            weatherStatus2 = "Clear";
+                        }
+
+                        weatherstatus_tv.setText(weatherStatus2);
+                        if (weatherStatus2.toLowerCase().contains("storm")) {
+                            weathericon_iv.setImageResource(R.drawable.rainy);
+                            backgroundLayout.setBackgroundResource(R.drawable.day_cloudy_background);
+                        }
+                        else {
+                            weathericon_iv.setImageResource(R.drawable.cloudy);
+                            backgroundLayout.setBackgroundResource(R.drawable.day_clearsky_background);
+
+                        }
+                        break;
+                }
+
+                //// update weather time icon
+                String weatherStatusMorning = weatherData.get(0).getWeatherMorning();
+                if (weatherStatusMorning.toLowerCase().contains("storm")) {
+                    weatherIconMorning_iv.setImageResource(R.drawable.rainy);
+                }
+                else {
+                    weatherIconMorning_iv.setImageResource(R.drawable.cloudy);
+                }
+
+                String weatherStatusAfternoon = weatherData.get(0).getWeatherAfternoon();
+                if (weatherStatusAfternoon.toLowerCase().contains("storm")) {
+                    weatherIconAfternoon_iv.setImageResource(R.drawable.rainy);
+                }
+                else {
+                    weatherIconAfternoon_iv.setImageResource(R.drawable.cloudy);
+                }
+
+                String weatherStatusNight = weatherData.get(0).getWeatherNight();
+                if (weatherStatusNight.toLowerCase().contains("storm")) {
+                    weatherIconNight_iv.setImageResource(R.drawable.rainy);
+                }
+                else {
+                    weatherIconNight_iv.setImageResource(R.drawable.cloudynight);
+                }
+
+                // update upcoming data
+                weatherUpDay1_tv.setText(weatherData.get(1).getDay());
+                weatherUpDay2_tv.setText(weatherData.get(2).getDay());
+                weatherUpDay3_tv.setText(weatherData.get(3).getDay());
+
+                String tempUnit = "°C";
+                weatherTempDay1_tv.setText(String.format("%s %s", weatherData.get(1).gettMax(), tempUnit));
+                weatherTempDay2_tv.setText(String.format("%s %s", weatherData.get(2).gettMax(), tempUnit));
+                weatherTempDay3_tv.setText(String.format("%s %s", weatherData.get(3).gettMax(), tempUnit));
+
+                ImageView[] weatherIcons = {weatherIconDay1_iv, weatherIconDay2_iv, weatherIconDay3_iv};
+                for (int i = 0; i < 3; i++) { String weatherHighlight = weatherData.get(i + 1).getWeatherHighlight().toLowerCase();
+                    if (weatherHighlight.contains("storm")) {
+                        weatherIcons[i].setImageResource(R.drawable.rainy);
+                    } else {
+                        weatherIcons[i].setImageResource(R.drawable.cloudy);
+                    }
+                }
+
+                weatherProgressBar.setVisibility(View.GONE);
             }
         }
     }
 
     //dialog for deleting location
     private void deleteLocationDialog(String databaseId, int position){
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Location")
-                .setMessage("Are you sure you want to delete this location?")
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete Location");
+        builder.setMessage("Are you sure you want to delete this location?");
 
-                    //DELETE FROM DATABASE
-                    myDB.deleteData(databaseId);
 
-                    //DELETE FROM CURRENT LIST
-                    locations.remove(position);
+        builder.setPositiveButton("Yes", (dialog, which) -> {
 
-                    //locationListAdapter.notifyDataSetChanged();
-                    locationListAdapter.notifyItemRemoved(position);
-                    locationListAdapter.notifyItemRangeChanged(position, locationListAdapter.getItemCount());
-                })
-                .setNegativeButton(android.R.string.no, null)
-                .show();
+            //DELETE FROM DATABASE
+            myDB.deleteData(databaseId);
+
+            //DELETE FROM CURRENT LIST
+            locations.remove(position);
+
+            //locationListAdapter.notifyDataSetChanged();
+            locationListAdapter.notifyItemRemoved(position);
+            locationListAdapter.notifyItemRangeChanged(position, locationListAdapter.getItemCount());
+        });
+
+        builder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.alert_dialog_bg_1);
+        dialog.show();
+
+        //SET DIALOG WIDTH SIZE
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(dialog.getWindow().getAttributes());
+        layoutParams.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.85); // 80% of screen width
+        dialog.getWindow().setAttributes(layoutParams);
     }
 
     //updates current location and save to prefs

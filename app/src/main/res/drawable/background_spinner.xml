@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+
+    <item>
+        <layer-list>
+            <!-- Outer shadow layer for the inset effect -->
+            <item>
+                <shape>
+                    <gradient
+                        android:startColor="#88B0B0B0"
+                        android:endColor="#05B0B0B0"
+                        android:angle="270"
+                        android:type="linear"/>
+                    <corners android:radius="20dp"/>
+                </shape>
+            </item>
+
+            <!-- Inner background layer -->
+            <item android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="2dp">
+                <shape>
+                    <solid android:color="@android:color/white"/>
+                    <corners android:radius="20dp"/>
+                    <padding android:left="8dp" android:top="8dp" android:right="8dp" android:bottom="8dp"/>
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</ripple>
+

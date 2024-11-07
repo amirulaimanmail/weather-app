@@ -49,4 +49,17 @@ public class CustomDateManager {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, days); return sdf.format(calendar.getTime());
     }
+
+    public int getTimeOfDay() {
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+        if (hour >= 6 && hour < 12) {
+            return 0;
+        } else if (hour >= 12 && hour < 18) {
+            return 1;
+        } else {
+            return 2;
+        }
+    }
 }

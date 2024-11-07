@@ -291,6 +291,20 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                 JSONObject jsonObject = new JSONObject(content.toString());
                 JSONArray resultsArray = jsonObject.getJSONArray("results");
 
+                String message = "";
+                switch(loader) {
+                    case 1: message = "Choose a state...";
+                    break;
+
+                    case 2: message = "Choose a district...";
+                    break;
+
+                    default: message = "Error";
+                    break;
+                }
+
+                WeatherLocationModel placeholder = new WeatherLocationModel("null", message);
+                locationsList.add(placeholder);
 
                 for (int i = 0; i < resultsArray.length(); i++) {
                     JSONObject result = resultsArray.getJSONObject(i);
@@ -313,11 +327,10 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
 
             switch(loader){
                 case 1:
-                    Log.d("TAG", "WEE");
+                    spinner1.setEnabled(true);
                     locationProgressBar1.setVisibility(View.INVISIBLE);
                     break;
                 case 2:
-                    Log.d("TAG", "WOO");
                     if(locationsList.isEmpty()){
                         spinner2.setEnabled(false);
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
@@ -326,10 +339,7 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                         spinner2.setEnabled(true);
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                     }
-                    Log.d("TAG", "1");
                     locationProgressBar2.setVisibility(View.INVISIBLE);
-                    Log.d("TAG", "2");
-                    spinner1.setEnabled(true);
                     break;
             }
 
@@ -377,148 +387,159 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                 conn.disconnect();
 
                 JSONObject jsonObject = new JSONObject(content.toString());
+
                 JSONArray resultsArray = jsonObject.getJSONArray("results");
 
-                DisplayWeatherDataModel weatherDayData1 = new DisplayWeatherDataModel();
-                DisplayWeatherDataModel weatherDayData2 = new DisplayWeatherDataModel();
-                DisplayWeatherDataModel weatherDayData3 = new DisplayWeatherDataModel();
-                DisplayWeatherDataModel weatherDayData4 = new DisplayWeatherDataModel();
+                DisplayWeatherDataModel nullWeather = new DisplayWeatherDataModel("NULL");
 
-                for(int i = 0; i < 6; i ++){
+                if(resultsArray.length() != 0){
+                    DisplayWeatherDataModel weatherDayData1 = new DisplayWeatherDataModel();
+                    DisplayWeatherDataModel weatherDayData2 = new DisplayWeatherDataModel();
+                    DisplayWeatherDataModel weatherDayData3 = new DisplayWeatherDataModel();
+                    DisplayWeatherDataModel weatherDayData4 = new DisplayWeatherDataModel();
 
-                    for (int j = 0; j < 4; j++) {
-                        JSONObject result = resultsArray.getJSONObject(i * 4 + j); // Adjust index for nested loop
+                    for(int i = 0; i < 6; i ++){
 
-                        switch(result.getString("datatype")){
-                            case "FGM":
-                                CustomDateManager converter = new CustomDateManager();
-                                switch(j){
-                                    case 0:
-                                        weatherDayData1.setLocationName(result.getString("locationname"));
-                                        weatherDayData2.setLocationName(result.getString("locationname"));
-                                        weatherDayData3.setLocationName(result.getString("locationname"));
-                                        weatherDayData4.setLocationName(result.getString("locationname"));
+                        for (int j = 0; j < 4; j++) {
+                            JSONObject result = resultsArray.getJSONObject(i * 4 + j); // Adjust index for nested loop
 
-                                        weatherDayData1.setWeatherMorning(result.getString("value"));
+                            switch(result.getString("datatype")){
+                                case "FGM":
+                                    CustomDateManager converter = new CustomDateManager();
+                                    switch(j){
+                                        case 0:
+                                            weatherDayData1.setLocationName(result.getString("locationname"));
+                                            weatherDayData2.setLocationName(result.getString("locationname"));
+                                            weatherDayData3.setLocationName(result.getString("locationname"));
+                                            weatherDayData4.setLocationName(result.getString("locationname"));
 
-                                        weatherDayData1.setDate(result.getString("date"));
-                                        String day1 = converter.convertDateToDay(result.getString("date"));
-                                        weatherDayData1.setDay(day1);
-                                        break;
-                                    case 1:
-                                        weatherDayData2.setWeatherMorning(result.getString("value"));
+                                            weatherDayData1.setWeatherMorning(result.getString("value"));
 
-                                        weatherDayData2.setDate(result.getString("date"));
-                                        String day2 = converter.convertDateToDay(result.getString("date"));
-                                        weatherDayData2.setDay(day2);
-                                        break;
-                                    case 2:
-                                        weatherDayData3.setWeatherMorning(result.getString("value"));
+                                            weatherDayData1.setDate(result.getString("date"));
+                                            String day1 = converter.convertDateToDay(result.getString("date"));
+                                            weatherDayData1.setDay(day1);
+                                            break;
+                                        case 1:
+                                            weatherDayData2.setWeatherMorning(result.getString("value"));
 
-                                        weatherDayData3.setDate(result.getString("date"));
-                                        String day3 = converter.convertDateToDay(result.getString("date"));
-                                        weatherDayData3.setDay(day3);
-                                        break;
-                                    case 3:
-                                        weatherDayData4.setWeatherMorning(result.getString("value"));
+                                            weatherDayData2.setDate(result.getString("date"));
+                                            String day2 = converter.convertDateToDay(result.getString("date"));
+                                            weatherDayData2.setDay(day2);
+                                            break;
+                                        case 2:
+                                            weatherDayData3.setWeatherMorning(result.getString("value"));
 
-                                        weatherDayData4.setDate(result.getString("date"));
-                                        String day4 = converter.convertDateToDay(result.getString("date"));
-                                        weatherDayData4.setDay(day4);
-                                        break;
-                                }
-                                break;
+                                            weatherDayData3.setDate(result.getString("date"));
+                                            String day3 = converter.convertDateToDay(result.getString("date"));
+                                            weatherDayData3.setDay(day3);
+                                            break;
+                                        case 3:
+                                            weatherDayData4.setWeatherMorning(result.getString("value"));
 
-                            case "FGA":
-                                switch(j) {
-                                    case 0:
-                                        weatherDayData1.setWeatherAfternoon(result.getString("value"));
-                                        break;
-                                    case 1:
-                                        weatherDayData2.setWeatherAfternoon(result.getString("value"));
-                                        break;
-                                    case 2:
-                                        weatherDayData3.setWeatherAfternoon(result.getString("value"));
-                                        break;
-                                    case 3:
-                                        weatherDayData4.setWeatherAfternoon(result.getString("value"));
-                                        break;
-                                }
+                                            weatherDayData4.setDate(result.getString("date"));
+                                            String day4 = converter.convertDateToDay(result.getString("date"));
+                                            weatherDayData4.setDay(day4);
+                                            break;
+                                    }
+                                    break;
 
-                            case "FGN":
-                                switch(j) {
-                                    case 0:
-                                        weatherDayData1.setWeatherNight(result.getString("value"));
-                                        break;
-                                    case 1:
-                                        weatherDayData2.setWeatherNight(result.getString("value"));
-                                        break;
-                                    case 2:
-                                        weatherDayData3.setWeatherNight(result.getString("value"));
-                                        break;
-                                    case 3:
-                                        weatherDayData4.setWeatherNight(result.getString("value"));
-                                        break;
-                                }
+                                case "FGA":
+                                    switch(j) {
+                                        case 0:
+                                            weatherDayData1.setWeatherAfternoon(result.getString("value"));
+                                            break;
+                                        case 1:
+                                            weatherDayData2.setWeatherAfternoon(result.getString("value"));
+                                            break;
+                                        case 2:
+                                            weatherDayData3.setWeatherAfternoon(result.getString("value"));
+                                            break;
+                                        case 3:
+                                            weatherDayData4.setWeatherAfternoon(result.getString("value"));
+                                            break;
+                                    }
 
-                            case "FMAXT":
-                                switch(j) {
-                                    case 0:
-                                        weatherDayData1.settMax(result.getString("value"));
-                                        break;
-                                    case 1:
-                                        weatherDayData2.settMax(result.getString("value"));
-                                        break;
-                                    case 2:
-                                        weatherDayData3.settMax(result.getString("value"));
-                                        break;
-                                    case 3:
-                                        weatherDayData4.settMax(result.getString("value"));
-                                        break;
-                                }
-                                break;
+                                case "FGN":
+                                    switch(j) {
+                                        case 0:
+                                            weatherDayData1.setWeatherNight(result.getString("value"));
+                                            break;
+                                        case 1:
+                                            weatherDayData2.setWeatherNight(result.getString("value"));
+                                            break;
+                                        case 2:
+                                            weatherDayData3.setWeatherNight(result.getString("value"));
+                                            break;
+                                        case 3:
+                                            weatherDayData4.setWeatherNight(result.getString("value"));
+                                            break;
+                                    }
 
-                            case "FMINT":
-                                switch(j) {
-                                    case 0:
-                                        weatherDayData1.settMin(result.getString("value"));
-                                        break;
-                                    case 1:
-                                        weatherDayData2.settMin(result.getString("value"));
-                                        break;
-                                    case 2:
-                                        weatherDayData3.settMin(result.getString("value"));
-                                        break;
-                                    case 3:
-                                        weatherDayData4.settMin(result.getString("value"));
-                                        break;
-                                }
-                                break;
+                                case "FMAXT":
+                                    switch(j) {
+                                        case 0:
+                                            weatherDayData1.settMax(result.getString("value"));
+                                            break;
+                                        case 1:
+                                            weatherDayData2.settMax(result.getString("value"));
+                                            break;
+                                        case 2:
+                                            weatherDayData3.settMax(result.getString("value"));
+                                            break;
+                                        case 3:
+                                            weatherDayData4.settMax(result.getString("value"));
+                                            break;
+                                    }
+                                    break;
 
-                            case "FSIGW":
-                                switch(j) {
-                                    case 0:
-                                        weatherDayData1.setWeatherHighlight(result.getString("value"));
-                                        break;
-                                    case 1:
-                                        weatherDayData2.setWeatherHighlight(result.getString("value"));
-                                        break;
-                                    case 2:
-                                        weatherDayData3.setWeatherHighlight(result.getString("value"));
-                                        break;
-                                    case 3:
-                                        weatherDayData4.setWeatherHighlight(result.getString("value"));
-                                        break;
-                                }
-                                break;
+                                case "FMINT":
+                                    switch(j) {
+                                        case 0:
+                                            weatherDayData1.settMin(result.getString("value"));
+                                            break;
+                                        case 1:
+                                            weatherDayData2.settMin(result.getString("value"));
+                                            break;
+                                        case 2:
+                                            weatherDayData3.settMin(result.getString("value"));
+                                            break;
+                                        case 3:
+                                            weatherDayData4.settMin(result.getString("value"));
+                                            break;
+                                    }
+                                    break;
+
+                                case "FSIGW":
+                                    switch(j) {
+                                        case 0:
+                                            weatherDayData1.setWeatherHighlight(result.getString("value"));
+                                            break;
+                                        case 1:
+                                            weatherDayData2.setWeatherHighlight(result.getString("value"));
+                                            break;
+                                        case 2:
+                                            weatherDayData3.setWeatherHighlight(result.getString("value"));
+                                            break;
+                                        case 3:
+                                            weatherDayData4.setWeatherHighlight(result.getString("value"));
+                                            break;
+                                    }
+                                    break;
+                            }
                         }
                     }
-                }
 
-                weatherData.add(weatherDayData1);
-                weatherData.add(weatherDayData2);
-                weatherData.add(weatherDayData3);
-                weatherData.add(weatherDayData4);
+                    weatherData.add(weatherDayData1);
+                    weatherData.add(weatherDayData2);
+                    weatherData.add(weatherDayData3);
+                    weatherData.add(weatherDayData4);
+                }
+                else {
+                    weatherData.add(nullWeather);
+                    weatherData.add(nullWeather);
+                    weatherData.add(nullWeather);
+                    weatherData.add(nullWeather);
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -698,6 +719,7 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         }
         //Toast.makeText(this, "DATA RETRIEVED: "+ retrievedId, Toast.LENGTH_SHORT).show();
         return retrievedId;
+//        return "LOCATION:1";
     }
 
     //updates front screen
@@ -705,6 +727,7 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
         CustomDateManager getDate = new CustomDateManager();
         String currentDate = getDate.getCurrentDate();
         String forecastDate = getDate.getDateAfterDays(3);
+
         new FetchWeatherForecast().execute("https://api.met.gov.my/v2.1/data?datasetid=FORECAST&datacategoryid=GENERAL&locationid="+ retrieveDisplayLocation() +"&start_date=" + currentDate + "&end_date=" + forecastDate);
     }
 }

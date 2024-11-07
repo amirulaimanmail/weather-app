@@ -13,6 +13,33 @@ public class DisplayWeatherDataModel {
     private String weatherAfternoon;
     private String weatherNight;
 
+    public DisplayWeatherDataModel(String locationName, String date, String day, String tMin, String tMax, String weatherHighlight, String weatherMorning, String weatherAfternoon, String weatherNight) {
+        this.locationName = locationName;
+        this.date = date;
+        this.day = day;
+        this.tMin = tMin;
+        this.tMax = tMax;
+        this.weatherHighlight = weatherHighlight;
+        this.weatherMorning = weatherMorning;
+        this.weatherAfternoon = weatherAfternoon;
+        this.weatherNight = weatherNight;
+    }
+
+    public DisplayWeatherDataModel(String nullString){
+        this.locationName = nullString;
+        this.date = nullString;
+        this.day = nullString;
+        this.tMin = nullString;
+        this.tMax = "0";
+        this.weatherHighlight = nullString;
+        this.weatherMorning = nullString;
+        this.weatherAfternoon = nullString;
+        this.weatherNight = nullString;
+    }
+
+    public DisplayWeatherDataModel(){
+    }
+
     public String getLocationName() {
         return locationName;
     }

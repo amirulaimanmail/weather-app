@@ -43,9 +43,10 @@ public class SpinnerAdapter extends ArrayAdapter<WeatherLocationModel> {
 
         WeatherLocationModel location = locations.get(position);
         TextView textView = view.findViewById(R.id.text1);
+
         textView.setText(location.getLocationName());
 
-        if (existingLocations.contains(location.getLocationId())) {
+        if (existingLocations.contains(location.getLocationId()) | position == 0) {
             textView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
         } else {
             textView.setTextColor(context.getResources().getColor(android.R.color.black));
@@ -55,7 +56,11 @@ public class SpinnerAdapter extends ArrayAdapter<WeatherLocationModel> {
 
     // Method to check if the item is disabled
      public boolean isItemDisabled(int position) {
-        WeatherLocationModel location = locations.get(position);
-        return existingLocations.contains(location.getLocationId());
+         if (position == 0) {
+             return true;
+         } else {
+             WeatherLocationModel location = locations.get(position);
+             return existingLocations.contains(location.getLocationId());
+         }
     }
 }

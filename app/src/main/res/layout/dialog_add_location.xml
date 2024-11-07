@@ -10,11 +10,11 @@
         android:id="@+id/spinner1"
         android:layout_width="0dp"
         android:layout_height="45dp"
+        android:background="@drawable/background_spinner"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/background_spinner" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
         android:id="@+id/spinner2"

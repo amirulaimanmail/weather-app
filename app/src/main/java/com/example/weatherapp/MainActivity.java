@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -155,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
 
         AlertDialog dialog = builder.create();
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.alert_dialog_bg_1);
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(R.drawable.alert_dialog_bg_1);
         dialog.show();
 
         //SET DIALOG WIDTH SIZE
@@ -291,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements LocationListAdapt
                 JSONObject jsonObject = new JSONObject(content.toString());
                 JSONArray resultsArray = jsonObject.getJSONArray("results");
 
-                String message = "";
+                String message;
                 switch(loader) {
                     case 1: message = "Choose a state...";
                     break;

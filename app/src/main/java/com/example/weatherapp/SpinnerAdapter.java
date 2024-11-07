@@ -48,10 +48,22 @@ public class SpinnerAdapter extends ArrayAdapter<WeatherLocationModel> {
 
         if (existingLocations.contains(location.getLocationId()) | position == 0) {
             textView.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+            textView.setEnabled(false);
         } else {
             textView.setTextColor(context.getResources().getColor(android.R.color.black));
+            textView.setEnabled(true);
         }
         return view;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        if(position == 0){
+            return false;
+        }
+
+        WeatherLocationModel location = locations.get(position);
+        return (!existingLocations.contains(location.getLocationId()));
     }
 
     // Method to check if the item is disabled
